@@ -72,6 +72,10 @@ const createUser = async function (req, res) {
 
         let userAddress = JSON.parse(userDetails.address)
         userDetails.address = userAddress
+        
+        if (!validator.isValid(userAddress.shipping && userAddress.billing)) { 
+            return res.status(400).send({ status: false, message: "Please provide Address shipping And Billing Address" });
+        }
 
         if (!validator.isValid(userAddress.shipping.street)) {
             return res.status(400).send({ status: false, message: "Please provide address shipping street" });
@@ -79,8 +83,8 @@ const createUser = async function (req, res) {
         if (!validator.isValid(userAddress.shipping.city)) {
             return res.status(400).send({ status: false, message: "Please provide address shipping city" });
         }
-        if (!validator.isValid(userAddress.shipping.pincode)) {
-            return res.status(400).send({ status: false, message: "Please provide address shipping pincode" });
+        if (!(validator.isValid(userAddress.shipping.pincode)&&Number.isInteger(Number(userAddress.shipping.pincode)))) {
+            return res.status(400).send({ status: false, message: "Please provide valid address shipping pincode" });
         }
         if (!validator.isValid(userAddress.billing.street)) {
             return res.status(400).send({ status: false, message: "Please provide address billing street" });
@@ -88,8 +92,8 @@ const createUser = async function (req, res) {
         if (!validator.isValid(userAddress.billing.city)) {
             return res.status(400).send({ status: false, message: "Please provide address billing city" });
         }
-        if (!validator.isValid(userAddress.billing.pincode)) {
-            return res.status(400).send({ status: false, message: "Please provide address billing pincode" });
+        if (!(validator.isValid(userAddress.billing.pincode)&&Number.isInteger(Number(userAddress.billing.pincode)))) {
+            return res.status(400).send({ status: false, message: "Please provide valid address billing pincode" });
         }
 
         let userImage = await aws_s3.uploadFile(files[0]);
@@ -138,19 +142,20 @@ const userLogin = async function (req, res) {
         const userData = await userModel.findOne({ email });
 
         if (!userData) {
-            return res.status(401).send({ status: false, message: `Login failed! Email-Id is incorrect!` });
+            return res.status(401).send({ status: false, message: `Login failed!! Email-Id is incorrect!` });
         }
 
         const checkPassword = await bcrypt.compare(password, userData.password)
 
-        if (!checkPassword) return res.status(401).send({ status: false, message: `Login failed! password is incorrect.` });
+        if (!checkPassword) return res.status(401).send({ status: false, message: `Login failed!! password is incorrect.` });
+        let userId=userData._id
         const token = jwt.sign({
-            userId: userData._id,
+            userId: userId,
             iat: Math.floor(Date.now() / 1000),
             exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60
         }, 'BYRD87KJVUV%^%*CYTC')
 
-        return res.status(200).send({ status: true, message: "LogIn Successful!!", data: token });
+        return res.status(200).send({ status: true, message: "LogIn Successful!!", data: {userId:userId,Token:token} });
 
     } catch (err) {
 
@@ -177,11 +182,11 @@ const getUserDetails = async function (req, res) {
         const findUserDetails = await userModel.findById(userId)
 
         if (!findUserDetails) {
-            return res.status(400).send({ status: false, message: "User Not Found!!" })
+            return res.status(404).send({ status: false, message: "User Not Found!!" })
         }
 
         if (findUserDetails._id.toString() != userIdFromToken) {
-            return res.status(401).send({ status: false, message: "You Are Not Authorized!!" });
+            return res.status(403).send({ status: false, message: "You Are Not Authorized!!" });
         }
 
         return res.status(200).send({ status: true, message: "Profile Fetched Successfully!!", data: findUserDetails })
@@ -243,7 +248,7 @@ const updateUserDetails = async function (req, res) {
             const checkEmailFromDb = await userModel.findOne({ email: userDetails.email })
 
             if (checkEmailFromDb)
-                return res.status(400).send({ status: false, message: `emailId is Exists. Please try another email Id.` })
+                return res.status(404).send({ status: false, message: `emailId is Exists. Please try another email Id.` })
         }
 
 
@@ -331,12 +336,10 @@ const updateUserDetails = async function (req, res) {
                 }
             }
         }
-        if(profileImage){
-        if (!files.length) {
-            return res.status(400).send({ status: false, message: "please provide profile image" })
+        
+        if (files&&files.length) {
+            var userImage = await aws_s3.uploadFile(files[0])
         }
-        var userImage = await aws_s3.uploadFile(files[0])
-    }
         
         
     

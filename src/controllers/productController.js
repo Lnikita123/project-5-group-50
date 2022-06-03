@@ -122,7 +122,8 @@ const getAllProducts = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Please Provide a Valid Size!" })
         }
         if (inputs.size) {
-            filterData['availableSizes'] = inputs.size
+            let sizes = inputs.size.split(",").map(x => x.trim())
+            filterData['availableSizes'] = sizes
         }
 
         if (!validator.validString(inputs.name)) {
@@ -335,14 +336,11 @@ const updateProduct = async function (req, res) {
             updatedProductDetails['isFreeShipping'] = isFreeShipping
         }
 
-        if (productImage) {
-
-            if (!files.length) {
-                return res.status(400).send({ status: false, message: "Please provide product image" })
-            }
+        if (files && files.length) {
 
             let updatedproductImage = await aws_s3.uploadFile(files[0]);
             updatedProductDetails.productImage = updatedproductImage
+
         }
 
         if (!validator.validString(style)) {
