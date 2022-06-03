@@ -210,11 +210,11 @@ const updateUserDetails = async function (req, res) {
         const findUserData = await userModel.findById(userId)
 
         if (!findUserData) {
-            return res.status(400).send({ status: false, message: "user not found" })
+            return res.status(404).send({ status: false, message: "user not found" })
         }
 
         if (findUserData._id.toString() != userIdFromToken) {
-            return res.status(401).send({ status: false, message: "You Are Not Authorized!!" })
+            return res.status(403).send({ status: false, message: "You Are Not Authorized!!" })
         }
 
         let { fname, lname, email, phone, password, address,profileImage} = userDetails
@@ -379,4 +379,4 @@ const updateUserDetails = async function (req, res) {
 
 
 module.exports = { createUser, userLogin, getUserDetails, updateUserDetails }
-
+//{"shipping":{"street":"MGRoad","city":"Indore","pincode":452001},"billing":{"street":"MG Road","city":"Indore","pincode":452001}}
