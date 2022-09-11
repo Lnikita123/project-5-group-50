@@ -222,7 +222,7 @@ const updateCart = async function (req, res) {
             }
             let updatedCart = await cartModel.findOneAndUpdate(
                 { _id: cartId },
-                { $pull: { items: { productId: productId } }, $set: { totalPrice: totalAmount }, $inc: { totalItems: -1 } },
+                { $pull: { items: { productId: productId } }, $set: { totalPrice: totalAmount }, $inc: { totalItems: -1 } }, //The $pull operator is used to remove all the instances of a value or values from a MongoDB document that matches a specified condition.
                 { new: true })
             return res.status(200).send({ status: true, msg: "successfully item removed from cart", data: updatedCart })
         }
