@@ -42,7 +42,7 @@ const createUser = async function (req, res) {
         }
 
         if (!files.length) {
-            return res.status(400).send({ status: false, message: "Profile Image is required" })
+            return res.status(400).send({ status: false, message: "Profile Image is required" })  //checking the file if it is present or not.
         }
 
         if (!validator.isValid(userDetails.phone)) {
@@ -96,9 +96,9 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, message: "Please provide valid address billing pincode" });
         }
 
-        let userImage = await aws_s3.uploadFile(files[0]);
+        let userImage = await aws_s3.uploadFile(files[0]); // for uploading the file in the aws s3 bucket.
 
-        const hashedPassword = await bcrypt.hash(userDetails.password, 10)
+        const hashedPassword = await bcrypt.hash(userDetails.password, 10) // for hashing the password so that it is not visible in the database.
 
         userDetails.profileImage = userImage
         userDetails.password = hashedPassword
@@ -151,9 +151,8 @@ const userLogin = async function (req, res) {
         let userId=userData._id
         const token = jwt.sign({
             userId: userId,
-            iat: Math.floor(Date.now() / 1000),
-            exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60
-        }, 'BYRD87KJVUV%^%*CYTC')
+          exp: 5 hrs
+        }, 'BYRD87KJVUV%^%*CYTC') //encrypted signature
 
         return res.status(200).send({ status: true, message: "LogIn Successful!!", data: {userId:userId,Token:token} });
 
@@ -185,7 +184,7 @@ const getUserDetails = async function (req, res) {
             return res.status(404).send({ status: false, message: "User Not Found!!" })
         }
 
-        if (findUserDetails._id.toString() != userIdFromToken) {
+        if (findUserDetails._id.toString() != userIdFromToken) {    // This is used for the authorization.
             return res.status(403).send({ status: false, message: "You Are Not Authorized!!" });
         }
 
@@ -218,7 +217,7 @@ const updateUserDetails = async function (req, res) {
             return res.status(404).send({ status: false, message: "user not found" })
         }
 
-        if (findUserData._id.toString() != userIdFromToken) {
+        if (findUserData._id.toString() != userIdFromToken) {  // used for authorization.
             return res.status(403).send({ status: false, message: "You Are Not Authorized!!" })
         }
 
@@ -338,7 +337,7 @@ const updateUserDetails = async function (req, res) {
         }
         
         if (files&&files.length) {
-            var userImage = await aws_s3.uploadFile(files[0])
+            var userImage = await aws_s3.uploadFile(files[0]) //for adding files in aws bucket created by us.
         }
         
         
@@ -382,4 +381,3 @@ const updateUserDetails = async function (req, res) {
 
 
 module.exports = { createUser, userLogin, getUserDetails, updateUserDetails }
-//{"shipping":{"street":"MGRoad","city":"Indore","pincode":452001},"billing":{"street":"MG Road","city":"Indore","pincode":452001}}
