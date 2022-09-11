@@ -89,7 +89,7 @@ const productCreation = async function (req, res) {
         if (availableSizes) {
             let sizes = availableSizes.split(",").map(x => x.trim())
             sizes.forEach((size) => {
-                if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(size)) {
+                if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(size)) { //Will iterate through whole array and check if the size is available or not.
                     return res.status(400).send({ status: false, msg: `Available sizes must be among ${["S", "XS", "M", "X", "L", "XXL", "XL"]}` })
                 }
                 productDetails['availableSizes'] = sizes
@@ -193,16 +193,6 @@ const getAllProducts = async function (req, res) {
 
             return res.status(200).send({ status: true, message: 'Product list', data2: products })
         }
-
-
-        const products = await productModel.find(filterData)
-
-        if (!products.length) {
-            return res.status(404).send({ productStatus: false, message: 'No Product found' })
-        }
-
-        return res.status(200).send({ status: true, message: 'Product list', data: products })
-
 
     } catch (err) {
         return res.status(500).send({ status: false, error: err.message });
