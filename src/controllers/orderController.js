@@ -69,8 +69,9 @@ const createOrder = async function (req, res) {
             }
         }
 
-        let quantity = checkCart.items.map((item) => item.quantity).reduce((a, b) => a + b, 0)  /*total quantity*/
-
+        let quantity = checkCart.items.map((item) => item.quantity).reduce((a, b) => a + b, 0)  /*total quantity*/  
+       //The reduce() method reduces the given array into a single value by executing a reducer function. 
+        //The user implements the reducer function that works on every element present in the array.
         if (quantity == 0) {
             return res.status(400).send({ status: false, message: "The cart is Empty" });
         }
